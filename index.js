@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const pizzaId = target.dataset.pizzaId;
             const selectedPizza = pizzas.find(item => item.id === pizzaId);
             if (selectedPizza) {
-                alert(SelectedPizza:${selectedPizza.name} - Status: ${selectedPizza.status});
+                alert(`SelectedPizza: ${selectedPizza.name} - Status: ${selectedPizza.status}`);
             }
         }
     });
