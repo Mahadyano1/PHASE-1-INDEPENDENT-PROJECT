@@ -1,8 +1,11 @@
-let pizzas = []; // Array to store pizza objects
-
 document.addEventListener('DOMContentLoaded', () => {
     const apiUrl = 'https://api.status.pizza/status.json';
     const pizzaStatusSection = document.getElementById('pizzaStatusSection');
+
+    if (!pizzaStatusSection) {
+        console.error('Element with ID "pizzaStatusSection" not found.');
+        return; // Stop further execution if element not found
+    }
 
     // Fetch pizza status data from API
     fetch(apiUrl)
@@ -13,8 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
+            // Check if the response data contains the expected format
+            if (!Array.isArray(data.status)) {
+                throw new Error('Invalid data format: "status" array not found');
+            }
+
             // Update pizzas array with status items
-            pizzas = data.status;
+            const pizzas = data.status;
 
             // Display pizza status information with cover images
             renderPizzaStatus(pizzas);
@@ -24,52 +32,33 @@ document.addEventListener('DOMContentLoaded', () => {
             pizzaStatusSection.innerHTML = '<p>Failed to fetch pizza status. Please try again later.</p>';
         });
 
-    // Event listener for section click
-    pizzaStatusSection.addEventListener('click', () => {
-        alert('You clicked the pizza status section!');
-    });
+    // Function to render pizza status information with cover images
+    function renderPizzaStatus(pizzaArray) {
+        pizzaStatusSection.innerHTML = ''; // Clear existing content
 
-    // Event listener for pizza item click
-    pizzaStatusSection.addEventListener('click', event => {
-        const target = event.target;
-        if (target.classList.contains('pizza-item')) {
-            const pizzaId = target.dataset.pizzaId;
-            const selectedPizza = pizzas.find(item => item.id === pizzaId);
-            if (selectedPizza) {
-                alert(`SelectedPizza: ${selectedPizza.name} - Status: ${selectedPizza.status}`);
-            }
-        }
-    });
+        // Loop through each pizza item
+        pizzaArray.forEach(pizza => {
+            // Create a div element for each pizza item
+            const pizzaDiv = document.createElement('div');
+            pizzaDiv.classList.add('pizza-item');
+            pizzaDiv.dataset.pizzaId = pizza.id; // Set the pizza ID as a data attribute for identification
 
-    // More event listeners can be added based on requirements
+            // Create an image element for the cover image
+            const imgElement = document.createElement('img');
+            imgElement.src = pizza.cover_image; // Set the image source
+            imgElement.alt = pizza.name; // Set the alt text for accessibility
+            imgElement.classList.add('pizza-cover-image');
+
+            // Create a strong element for pizza name and append cover image
+            const nameElement = document.createElement('strong');
+            nameElement.textContent = pizza.name;
+
+            // Append the image and name elements to the pizza div
+            pizzaDiv.appendChild(imgElement);
+            pizzaDiv.appendChild(nameElement);
+
+            // Append the pizza div to the pizza status section
+            pizzaStatusSection.appendChild(pizzaDiv);
+        });
+    }
 });
-
-// Function to render pizza status information with cover images
-function renderPizzaStatus(pizzaArray) {
-    const pizzaStatusSection = document.getElementById('pizzaStatusSection');
-    pizzaStatusSection.innerHTML = ''; // Clear existing content
-
-    // Loop through each pizza item
-    pizzaArray.forEach(pizza => {
-        // Create a div element for each pizza item
-        const pizzaDiv = document.createElement('div');
-        pizzaDiv.classList.add('pizza-item');
-
-        // Create an image element for the cover image
-        const imgElement = document.createElement('img');
-        imgElement.src = pizza.cover_image; // Set the image source
-        imgElement.alt = pizza.name; // Set the alt text for accessibility
-        imgElement.classList.add('pizza-cover-image');
-
-        // Create a strong element for pizza name and append cover image
-        const nameElement = document.createElement('strong');
-        nameElement.textContent = pizza.name;
-
-        // Append the image and name elements to the pizza div
-        pizzaDiv.appendChild(imgElement);
-        pizzaDiv.appendChild(nameElement);
-
-        // Append the pizza div to the pizza status section
-        pizzaStatusSection.appendChild(pizzaDiv);
-    });
-}
